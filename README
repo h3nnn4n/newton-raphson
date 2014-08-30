@@ -1,1 +1,7 @@
-yyayayay
+C implementation of both Newton-Raphson method and fractal.
+
+The Polynomial root finder finds all real and complex roots of a given polynomial equation.
+
+The Newton-Raphson fractal prints a fractal of a given Polynomial equation.
+
+This code is under GPL2 and comes with no waranty.
