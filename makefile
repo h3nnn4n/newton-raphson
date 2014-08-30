@@ -1,6 +1,6 @@
 all:
-	gcc newton.c -o newton -O3 -fomit-frame-pointer -lm
-	gcc polynom_root_finder.c -o root_finder -O3 -lm -fomit-frame-pointer
+	gcc newton.c -o newton -O3 -fomit-frame-pointer -lm -w
+	gcc polynom_root_finder.c -o root_finder -O3 -lm -fomit-frame-pointer -w
 
 clean:
 	-rm -rf core* a.out newton feh* *.dat *.ppm root_finder
