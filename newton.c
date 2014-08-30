@@ -18,10 +18,12 @@ typedef struct{
 
 int process_root(_complex,_roots*,double);
 void root_init(_roots *);
+void newthon_raphson(_complex,_roots*,int,int*,double*,int,int,double,int,int);
 _complex f(_complex, int, double []);
 _complex df(_complex, int, double[]);
 
-int main(){
+
+int main(int argc,char *argv[]){
     int 	screenx,screeny,
             ix,iy,
             i,j,k,
@@ -58,7 +60,7 @@ int main(){
     screenx=1600;
     screeny=1200;
 
-    grad=3;
+    grad=9;
     nit=100;
 
     x0=0;
@@ -82,11 +84,11 @@ int main(){
         }
     }
 
-    poly[9]=-1;
-    poly[8]=-1;
-    poly[7]=-1;
-    poly[6]=-1;
-    poly[5]=-1;
+    poly[9]=-4;
+    poly[8]=12;
+    poly[7]=-4;
+    poly[6]=0;
+    poly[5]=-12;
     poly[4]=1;
     poly[3]=3;
     poly[2]=-2;
@@ -117,30 +119,9 @@ int main(){
             x=xin+2*j*dx/screenx;
             z=complex_init(x,y);
             itest=1;
-            for(k=0;k<=nit;k++){
-                kit=k;
-                fz = f(z,roots.grad,poly);
-                dfz=df(z,roots.grad,poly);
-                if(complex_abs(dfz)<ee){
-                    itest=0;
-                    break;
-                }
-                w=z;
-                z=complex_sub(z,complex_div(fz,dfz));
-                if(complex_abs(complex_sub(z,w))<=eps){
-                    break;
-                }
-            }
-            if(kit==nit){
-                itest=2;
-            }
-            if(i<screeny && i>=0 && j<screenx && j>=0){
-                if(itest!=1){
-                        escapetime[i*screenx+j]=666;
-                }else{
-                    escapetime[i*screenx+j]=process_root(z,&roots,eps);
-                }
-            }
+
+            newthon_raphson(z,&roots,nit,escapetime,poly,screenx,screenx,eps,i,j);
+
             z_space[i*screenx+j]=z;
             f_space[i*screenx+j]=fz;
             df_space[i*screenx+j]=dfz;
@@ -173,12 +154,12 @@ int main(){
                 col.b=255;
             }else if(col.r==5){
                 col.r=0;
-                col.g=0;
+                col.g=255;
                 col.b=255;
             }else if(col.r==6){
                 col.r=0;
                 col.g=255;
-                col.b=255;
+                col.b=127;
             }else if(col.r==7){
                 col.r=255;
                 col.g=127;
@@ -227,7 +208,7 @@ int main(){
 
     printf("\nZeroes and their images:\n\n");
     for(i=0;i<grad;i++){
-        printf("Root Z%d=%+lf% +lfi \tf(z%d)=",i,roots.root[i].x,roots.root[i].y,i);
+        printf("Root Z%d=%+lf %+lfi \tf(z%d)=",i,roots.root[i].x,roots.root[i].y,i);
         complex_print(f(roots.root[i],grad, poly));
     }
 
@@ -238,6 +219,36 @@ int main(){
     free(df_space);
 
     return EXIT_SUCCESS;
+}
+
+void newthon_raphson(_complex z,_roots* roots,int nit,int *escapetime,double poly[],int screenx, int screeny,double eps,int i,int j){
+    int k,kit,itest;
+    _complex w,fz,dfz;
+    itest=1;
+    for(k=0;k<=nit;k++){
+        kit=k;
+        fz = f(z,roots->grad,poly);
+        dfz=df(z,roots->grad,poly);
+        if(complex_abs(dfz)<ee){
+            itest=0;
+            break;
+        }
+        w=z;
+        z=complex_sub(z,complex_div(fz,dfz));
+        if(complex_abs(complex_sub(z,w))<=eps){
+            break;
+        }
+    }
+    if(kit==nit){
+        itest=2;
+    }
+    if(i<screeny && i>=0 && j<screenx && j>=0){
+        if(itest!=1){
+                escapetime[i*screenx+j]=666;
+        }else{
+            escapetime[i*screenx+j]=process_root(z,roots,eps);
+        }
+    }
 }
 
 int process_root(_complex z, _roots *p, double eps){
