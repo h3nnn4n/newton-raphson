@@ -6,24 +6,20 @@
 #define ee 1e-60
 #define MAX_ROOTS 50
 
-typedef struct{
-    _complex root[MAX_ROOTS];
-    int nor;
-    int grad;
+typedef struct{                 // This struct will contain at the end of the program execution
+    _complex root[MAX_ROOTS];   // all roots.
+    int nor;    // Number of Roots found;
+    int grad;   // Degree
 } _roots;
 
-typedef struct{
-	double r,g,b;
-}_color;
-
+// Prototype of the functions
 int process_root(_complex,_roots*,double);
 void root_init(_roots *);
 _complex f(_complex, int, double []);
 _complex df(_complex, int, double[]);
 
 int main(){
-    int     ix,iy,radius,i,tries,
-            grad,nit;
+    int     ix,iy,radius,i,tries,nit;
     double	zx,zy,zxn,zyn,cx,cy,theta,
             x,y,eps,
             poly[MAX_ROOTS+1];
@@ -32,29 +28,31 @@ int main(){
 
     root_init(&roots);
 
+    // Number of iteration for each pointer.
+    // The bigger, the less prone to error the program will be.
     nit=100;
 
+    // The radius where the points will be looked for.
     radius=6;
 
+    // Precision for the roots
     eps=1E-10;
 
-    scanf("%d",&grad);
+    scanf("%d",&roots.grad);
 
-    roots.grad=grad;
-
-    for(i=grad;i>=0;i--){
+    for(i=roots.grad;i>=0;i--){
         scanf("%lf",&poly[i]);
     }
 
     printf("Coefficients:\n");
-    for(i=grad;i>=0;i--){
+    for(i=roots.grad;i>=0;i--){
         printf(" a%d=%+.2f\n",i,poly[i]);
     }
 
     printf("\n f(0+0i)=");
-    complex_print(f(complex_init(0,0),grad, poly));
+    complex_print(f(complex_init(0,0),roots.grad, poly));
     printf("df(0+0i)=");
-    complex_print(df(complex_init(0,0),grad, poly));
+    complex_print(df(complex_init(0,0),roots.grad, poly));
 
     tries=0;
 
@@ -79,22 +77,26 @@ int main(){
                 break;
             }
         }
-    }while(roots.nor<grad);
+    }while(roots.nor<roots.grad);
 
-    printf("\nTook %d tries to get all %d roots\n",tries,grad);
+    printf("\nTook %d tries to get all %d roots\n",tries,roots.grad);
 
     printf("\nZeroes and their images:\n\n");
-    for(i=0;i<grad;i++){
+    for(i=0;i<roots.grad;i++){
         printf("Root Z%d=%+lf %+lfi \tf(z%d)=",i+1,roots.root[i].x,roots.root[i].y,i+1);
-        complex_print(f(roots.root[i],grad, poly));
+            complex_print(f(roots.root[i],roots.grad, poly));
     }
 
     return EXIT_SUCCESS;
 }
 
+// When a root is found this function is called.
+// It looks in a vector to find if the given root
+// was already found, if yes it returns the position
+// in the vector of the root, if not it simple adds
+// the root in the first avaliable position.
 int process_root(_complex z, _roots *p, double eps){
     int i;
-    _color c;
     for(i=0;i<p->nor;i++){
         if(complex_abs(complex_sub(z,p->root[i]))<2*eps){
             return i+1;
@@ -107,6 +109,7 @@ int process_root(_complex z, _roots *p, double eps){
     return p->nor;
 }
 
+// This function initialize the data structure for the roots
 void root_init(_roots *roots){
     int i;
     for(i=0;i<MAX_ROOTS;i++){
@@ -116,6 +119,8 @@ void root_init(_roots *roots){
     roots->grad=0;
 }
 
+// Here the polynomial function is evaluated at a point Z
+// in the complex plane.
 _complex f(_complex z, int grad, double poly[]){
     int i;
     _complex f;
@@ -126,6 +131,8 @@ _complex f(_complex z, int grad, double poly[]){
     return f;
 }
 
+// The evaluation of the derivative happens here in
+// the same way as the funtion bove.
 _complex df(_complex z, int grad, double poly[]){
     int i;
     _complex df;
